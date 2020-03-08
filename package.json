@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "php -d variables_order=EGPCS -S localhost:9000 router.php",
-    "test" : "cd tests; php run-tests.php"
+    "test" : "cd tests; php run-tests.php",
+    "merge-php5": "alfac src; git checkout -b php5-2; git add .; git commit --amend; git checkout php5; git merge php5-2; git branch -D php5-2;"
   },
   "author": "",
   "license": "ISC"
