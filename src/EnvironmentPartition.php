@@ -68,7 +68,7 @@ class EnvironmentPartition {
 
         if (!$foundModule) {
             // @fixme - more specific module.
-            throw new \Exception("Module `$id` is not installed for environment.");
+            throw new Exceptions\ModuleNotFound("Module `$id` is not installed for environment.");
         }
 
         return new Module($id, $foundModule);
