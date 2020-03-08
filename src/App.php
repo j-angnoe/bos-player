@@ -49,93 +49,32 @@ class App {
     function dispatch() {
         $this->init();
 
-        try {     
+        if ($this->featureOauth) { 
+            Utils\OAuth::middleware();
+        }
+    
+        ExceptionHandler::register();
         
-            if ($this->featureOauth) { 
-                Utils\OAuth::middleware();
-            }
-    
-            ExceptionHandler::register();
-            
-            //file_put_contents('php://stderr', $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . PHP_EOL);
+        //file_put_contents('php://stderr', $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . PHP_EOL);
 
-            BuiltinWebserver::tryServeStatics();
-            $environment = Environment::fromFile($_ENV['ENVIRONMENT_FILE']);
-    
-            $GLOBALS['collectedModuleData'] = $environment->collectedModuleData;
+        BuiltinWebserver::tryServeStatics();
+        $environment = Environment::fromFile($_ENV['ENVIRONMENT_FILE']);
+
+        $GLOBALS['collectedModuleData'] = $environment->collectedModuleData;
+        
+        $request = new RequestAgainstEnvironment($_SERVER, $environment);
+        
+        // $displayLog = false;
+        
+        // if (isset($_GET['bos-player-logs'])) {
+        //     $displayLog = true;
+        // }
+
+        // if ($displayLog) { ob_start(); }
             
-            $request = new RequestAgainstEnvironment($_SERVER, $environment);
-            
-            // $displayLog = false;
-            
-            // if (isset($_GET['bos-player-logs'])) {
-            //     $displayLog = true;
-            // }
-    
-            // if ($displayLog) { ob_start(); }
-                
-            $response = $request->dispatch();        
-            
-            // if ($displayLog) { 
-            //     BosLog::log('Request finished.');
-            //     ob_get_clean(); 
-            //     (new Utils\LogDisplayer($GLOBALS['BosPlayerLogs']))->render();
-            // }
-        } catch (Exceptions\UnknownPartition $e) {
-            echo (new Response\SelectPartition($environment, $mayRedirect = false));    
-        } catch (Exceptions\SelectPartition $e) {
-            echo (new Response\SelectPartition($environment));
-        } catch (Exceptions\SelectModule $e) {
-            echo (new Response\SelectModule($e));
-        } catch (Exceptions\LoginRequired $e) {
-            // @fixme - this should not be hardcoded.
-    
-            header('HTTP/1.1 403 Forbidden');
-    
-            if ($environment->provides('authentication')) {
-                $module = $environment->whoProvides('authentication', true);
-                $login_url = $module->definition['data']['login_url'] ?? false;
-                $login_url = $request->partition->url('/'.$module->id.'/'.ltrim($login_url,'/'));
-                if ($request->isAjaxRequest()) {
-                    exit(json_encode([
-                        'error' => 'You are not logged in',
-                        'solution' => [
-                            'location' => $login_url
-                        ]
-                    ]));
-                } else {
-                    header('Location: '.$login_url . '?redirect='.urlencode($_SERVER['REQUEST_URI']));
-                }
-            } else {
-                exit("Login required.");
-            }
-    
-        } catch (Exceptions\FileExecutionNotAllowed $e) {
-    
-            if ($_SERVER['APP_DEBUG'] ?? false) {
-                header('HTTP/1.1 403 Not allowed');
-                echo "Tried to execute a non-php file.";
-            } else {
-                header('HTTP/1.1 404 Not found');
-            }
-    
-        } catch (Exceptions\InsufficientPermissions $e) {
-            header('HTTP/1.1 401 Not authorized');
-    
-            if (!$request->isAjaxRequest()) {
-                echo "Not enough permissions";
-            }
-        } catch (Exceptions\RequireInGlobalScope $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            if (isset($displayLog) && $displayLog) { 
-                //LogTrait::error($e->getMessage(), $e->getTraceAsString(), 'exception');
-                (new Utils\LogDisplayer($GLOBALS['BosPlayerLogs']))->render();
-                echo $e;
-            } else {
-                throw $e;
-            }
-        }        
+        $response = $request->dispatch();        
+        
+        return $response;
     }
 
     // When a module requires it should be run 
