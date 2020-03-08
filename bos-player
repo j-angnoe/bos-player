@@ -1,0 +1,47 @@
+#!/usr/bin/env php
+<?php
+
+$opts = getopt('', [
+    'catalogue:',
+    'environment:',
+    'port:'
+]);
+
+if (empty($_ENV)) {
+    $_ENV = $_SERVER;
+}
+// options may also be provided via ENV.
+if (isset($_ENV['CATALOGUE_DIR'])) {
+    $opts['catalogue'] = $opts['catalogue'] ?? $_ENV['CATALOGUE_DIR'];
+}
+if (isset($_ENV['ENVIRONMENT_FILE'])) {
+    $opts['environment'] = $opts['environment'] ?? $_ENV['ENVIRONMENT_FILE'];
+}
+
+if (!isset($opts['catalogue'])) {
+    exit("Please provide --catalogue");
+}
+$extraEnv = '';
+foreach ($_ENV as $key=>$value) {
+    if (is_string($value)) { 
+        $extraEnv .= " $key=".escapeshellarg($value);
+    }
+}
+
+if (!isset($opts['environment'])) {
+    if (isset($_ENV['ENVIRONMENTS_DIR'])) {
+        $extraEnv .= " ENVIRONMENTS_DIR={$_ENV['ENVIRONMENTS_DIR']} ";
+    } else {
+        exit("Please provide --environment");
+    }
+} else {
+    $extraEnv .= " ENVIRONMENT_FILE={$opts['environment']} ";
+}
+
+$port = $opts['port'] ?? 9000;
+
+echo "Starting webserver on $port\n";
+
+$APP_URL="http://localhost:$port";
+
+$pid = system("APP_URL=$APP_URL CATALOGUE_DIR={$opts['catalogue']} $extraEnv php -d variables_order=EGPCS -S 0.0.0.0:$port ".__DIR__."/router.php");

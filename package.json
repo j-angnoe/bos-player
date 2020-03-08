@@ -1,0 +1,15 @@
+{
+  "name": "bos-player",
+  "version": "1.0.0",
+  "description": "Ingredienten: - Omgevingsdefinitie - Repository vol met modules",
+  "main": "index.js",
+  "bin": {
+    "bos-player": "./bos-player"
+  },
+  "scripts": {
+    "start": "php -d variables_order=EGPCS -S localhost:9000 router.php",
+    "test" : "cd tests; php run-tests.php"
+  },
+  "author": "",
+  "license": "ISC"
+}

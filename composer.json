@@ -1,0 +1,11 @@
+{
+    "name": "j-angnoe/bos-player",
+    "require": {
+        "ralouphie/mimey": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "BOS\\Player\\": "./src"
+        }
+    }
+}

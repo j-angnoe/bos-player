@@ -1,0 +1,7 @@
+{
+    "id" : "access-map",
+    "name" : "Access map",
+    "description" : "Set up access maps for environment",
+    "type" : "virtual",
+    "provides" : ["access-map"]
+}
