@@ -13,17 +13,26 @@ define('BOS_PLAYER_REQUEST_START', microtime(true));
 class App {
 
     var $featureOauth = false;
+    var $baseUrl = '';
 
     function setCatalogueDir($CATALOGUE_DIR) {
         $_ENV['CATALOGUE_DIR'] = $CATALOGUE_DIR;
     }
 
     function setEnvironmentFile($ENVIRONMENT_FILE) {
-        $_ENV['ENVIRONMENT_FILE'] = $ENVIRONMENT_FILE;
+        $this->environment = Environment::fromFile($ENVIRONMENT_FILE);
+    }
+
+    function setEnvironment($environment) {
+        $this->environment = $environment;
     }
 
     function enableOauth() {
         $this->featureOauth = true;
+    }
+
+    function setBaseUrl($baseUrl) {
+        $this->baseUrl = $baseUrl;
     }
 
     function init() {
@@ -46,6 +55,19 @@ class App {
         $_ENV['BOS_PLAYER_AUTOLOADER'] = "{$_ENV['BOS_PLAYER_DIR']}/vendor/autoload.php";
         $_ENV['BOS_PLAYER_CATALOGUE'] = "{$_ENV['BOS_PLAYER_DIR']}/catalogue/";
     }
+
+    function canDispatch() {
+        $environment = $this->environment;
+
+        if ($this->baseUrl) {
+            $environment->setBaseUrl($this->baseUrl);
+        }
+
+        $request = new RequestAgainstEnvironment($_SERVER, $environment);
+
+        return $request->canDispatch();
+    }
+
     function dispatch() {
         $this->init();
 
@@ -58,12 +80,19 @@ class App {
         //file_put_contents('php://stderr', $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . PHP_EOL);
 
         BuiltinWebserver::tryServeStatics();
-        $environment = Environment::fromFile($_ENV['ENVIRONMENT_FILE']);
+        $environment = $this->environment;
+
+        if ($this->baseUrl) {
+            $environment->setBaseUrl($this->baseUrl);
+
+        }
 
         $GLOBALS['collectedModuleData'] = $environment->collectedModuleData;
         
+
         $request = new RequestAgainstEnvironment($_SERVER, $environment);
         
+        $this->request = $request;
         // $displayLog = false;
         
         // if (isset($_GET['bos-player-logs'])) {

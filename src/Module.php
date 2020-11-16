@@ -20,7 +20,7 @@ class Module {
         if ($moduleDefinition['__path'] ?? false) {
             $this->path = $moduleDefinition['__path'];
         }
-        
+        $this->disabled = $configurationData['disabled'] ?? null;
         $this->settings = $configurationData['settings'] ?? [];
         $this->definition = $moduleDefinition;
     }
@@ -112,6 +112,10 @@ class Module {
     }
     function executeRequest($request, $callback = null) {
         // check if file exists inside a public/dist/build directory
+
+        if ($this->disabled) {
+            throw new Exceptions\ModuleNotFound('Module is disabled.');
+        }
 
         $this->setGlobals($request->environment);
 

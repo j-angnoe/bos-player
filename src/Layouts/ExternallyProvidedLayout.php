@@ -13,6 +13,14 @@ class ExternallyProvidedLayout extends Base {
         $this->options = $options;
     }
 
+    function url($path = '') {
+        $r = $this->request;
+
+        $part = (isset($r->partition) && $r->partition !== null) ? $r->partition :  $r->environment;
+
+        return '/' . ltrim($part->url($path),'/');
+    }
+
     function render($content) {
         $layoutFile = $_ENV['CATALOGUE_DIR'] . '/'.$this->options['layout'];
 

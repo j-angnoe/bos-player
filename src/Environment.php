@@ -135,7 +135,9 @@ class Environment {
         ];
 
         foreach ($this->modules as $module) {
-
+            if (isset($module['disabled']) && $module['disabled']) {
+                continue;
+            }
             $definition = Module::readDefinition($module['id'], false);
 
             // Everything inside the `data` key will be collected.

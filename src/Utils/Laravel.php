@@ -15,9 +15,8 @@ class Laravel {
         if ($path === null) {
             $path = getcwd();
         }
-        $root = $path{0} === '/' ? '' : $_ENV["CATALOGUE_DIR"];
+        $root = substr($path,0,1) === '/' ? '' : $_ENV["CATALOGUE_DIR"];
 
-        $baseUrl = "/" . ltrim($_ENV['BOS_ENVIRONMENT_URL'],"/") . "/" . basename($path);
 
         // Dont set globals, might mess up modules that try to bootstrap this.
         // $_SERVER['SCRIPT_NAME'] = "{$baseUrl}index.php";
@@ -38,9 +37,12 @@ class Laravel {
             \Illuminate\Foundation\Bootstrap\BootProviders::class
         ]);
     
-        // But do change UrlGenerator root
-        $app->get(\Illuminate\Routing\UrlGenerator::class)->forceRootUrl($_SERVER["SERVER_URL"] . $baseUrl);
-
+        if (isset($_SERVER['SERVER_URL'])) {
+            $baseUrl = "/" . ltrim($_ENV['BOS_ENVIRONMENT_URL'] ?? '',"/") . "/" . basename($path);
+ 
+            // But do change UrlGenerator root
+            $app->get(\Illuminate\Routing\UrlGenerator::class)->forceRootUrl($_SERVER["SERVER_URL"] . $baseUrl);
+        }
         restore_error_handler();
         restore_exception_handler();
         

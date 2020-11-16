@@ -25,13 +25,21 @@ class SimpleSchema {
         $blocks = [];
 
         while(false !== (list(,$line) = @each($definition))) { 
+            // skip comment lines
+            if (substr(ltrim($line), 0, 1) === '#') {
+                continue;
+            }
             if (substr($line, -1) === ':') {
                 $block_name = substr($line, 0, -1);
 
                 $blocks[$block_name] = [];
 
                 while(false !== (list(,$line) = each($definition))) { 
-
+                    // skip comment lines
+                    if (substr(ltrim($line), 0, 1) === '#') {
+                        continue;
+                    }
+                    
                     if (substr($line, -1) === ':') {
                         prev($definition);
                         continue 2;
@@ -176,7 +184,12 @@ class SimpleSchema {
 
         $fields = $this->processFields($this->fields);
 
-        $lastField = 'id';
+
+        if ($columnExists('id')) { 
+            $lastField = 'id';
+        } else {
+            $lastField = false;
+        }
 
         foreach ($fields as $fieldName => $fd) {
             $cb = false;
@@ -188,12 +201,17 @@ class SimpleSchema {
             }
             
             $modified = false;
+
+            if ($lastField) { 
+                $afterClause = "AFTER `$lastField`";
+            }
+
             if (!$columnExists($fieldName)) {
                 $modified = true;
-                $modifications[] = "$prefix ADD COLUMN `$fieldName` $fieldDefinition AFTER `$lastField`";
+                $modifications[] = "$prefix ADD COLUMN `$fieldName` $fieldDefinition $afterClause";
             } elseif (!$columnExists($fieldName, $fieldDefinition)) {
                 $modified = true;
-                $modifications[] = "$prefix MODIFY COLUMN `$fieldName` $fieldDefinition AFTER `$lastField`";
+                $modifications[] = "$prefix MODIFY COLUMN `$fieldName` $fieldDefinition $afterClause";
             }
 
             if ($modified && $cb) {
