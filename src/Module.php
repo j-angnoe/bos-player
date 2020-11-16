@@ -17,11 +17,11 @@ class Module {
 
         $moduleDefinition = self::readDefinition($id);
 
-        if ($moduleDefinition['__path'] ?? false) {
+        if ((isset($moduleDefinition['__path']) && $moduleDefinition['__path'] !== null) ? $moduleDefinition['__path'] :  false) {
             $this->path = $moduleDefinition['__path'];
         }
-        $this->disabled = $configurationData['disabled'] ?? null;
-        $this->settings = $configurationData['settings'] ?? [];
+        $this->disabled = (isset($configurationData['disabled']) && $configurationData['disabled'] !== null) ? $configurationData['disabled'] :  null;
+        $this->settings = (isset($configurationData['settings']) && $configurationData['settings'] !== null) ? $configurationData['settings'] :  [];
         $this->definition = $moduleDefinition;
     }
 
@@ -181,7 +181,7 @@ class Module {
         $type = $this->definition['type'];
 
         if (is_array($type)) {
-            return $type['standalone'] ?? false;
+            return (isset($type['standalone']) && $type['standalone'] !== null) ? $type['standalone'] :  false;
         }
         return false;
     }
@@ -199,7 +199,7 @@ class Module {
             return $baseModule->getExecutor($request);
         }
 
-        $type = ucfirst(is_string($type) ? $type : ($type['id'] ?? 'unknown'));
+        $type = ucfirst(is_string($type) ? $type : ((isset($type['id']) && $type['id'] !== null) ? $type['id'] :  'unknown'));
         $executorClass = "\BOS\Player\\{$type}ModuleExecutor";
 
         if (class_exists($executorClass)) {

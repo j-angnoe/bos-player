@@ -129,7 +129,7 @@ class SimpleSchema {
                 $field = $match['field1'] ? $match['field1'] : $match['field2'];
 
                 try { 
-                    $type = $this->grabAll("DESCRIBE $table $field")[0]['Type'] . " " . ltrim($match['extra'] ?? '');
+                    $type = $this->grabAll("DESCRIBE $table $field")[0]['Type'] . " " . ltrim((isset($match['extra']) && $match['extra'] !== null) ? $match['extra'] :  '');
 
                     $processed[$key] = [$type, function () use ($key, $table, $field, $match) {
                         return [
@@ -152,7 +152,7 @@ class SimpleSchema {
                 continue;
             } 
 
-            $value = $translateFields[$value] ?? $value;
+            $value = (isset($translateFields[$value]) && $translateFields[$value] !== null) ? $translateFields[$value] :  $value;
 
             $processed[$key] = $value;
         }

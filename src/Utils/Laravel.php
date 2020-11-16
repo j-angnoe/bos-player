@@ -38,7 +38,7 @@ class Laravel {
         ]);
     
         if (isset($_SERVER['SERVER_URL'])) {
-            $baseUrl = "/" . ltrim($_ENV['BOS_ENVIRONMENT_URL'] ?? '',"/") . "/" . basename($path);
+            $baseUrl = "/" . ltrim((isset($_ENV['BOS_ENVIRONMENT_URL']) && $_ENV['BOS_ENVIRONMENT_URL'] !== null) ? $_ENV['BOS_ENVIRONMENT_URL'] :  '',"/") . "/" . basename($path);
  
             // But do change UrlGenerator root
             $app->get(\Illuminate\Routing\UrlGenerator::class)->forceRootUrl($_SERVER["SERVER_URL"] . $baseUrl);

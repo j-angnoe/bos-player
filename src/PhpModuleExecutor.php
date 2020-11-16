@@ -26,7 +26,7 @@ class PhpModuleExecutor {
         chdir($path);
 
         $shared = [];
-        if (($this->module->definition['access'] ?? false)== 'admin') {
+        if (((isset($this->module->definition['access']) && $this->module->definition['access'] !== null) ? $this->module->definition['access'] :  false)== 'admin') {
             $shared = ['request' => &$this->request];
         }
         
@@ -39,7 +39,7 @@ class PhpModuleExecutor {
                 throw new Exceptions\FileExecutionNotAllowed;
             }
 
-            if ($type['require_in_global_scope'] ?? false) {
+            if ((isset($type['require_in_global_scope']) && $type['require_in_global_scope'] !== null) ? $type['require_in_global_scope'] :  false) {
                 throw new Exceptions\RequireInGlobalScope(func_get_arg(0), function($content) use ($callback) {
                     $callback($content);
                 });
@@ -52,7 +52,7 @@ class PhpModuleExecutor {
         
         $content = null;
 
-        if (is_string($type) || ($type['mainAllowPhp']??false) || !isset($type['main'])) {
+        if (is_string($type) || ((isset($type['mainAllowPhp']) && $type['mainAllowPhp'] !== null) ? $type['mainAllowPhp'] : false) || !isset($type['main'])) {
             // default php routing:
         
             if (is_file("{$path}/{$uri}")) {
@@ -93,7 +93,7 @@ class PhpModuleExecutor {
             }      
         } 
 
-        if ($type['main'] ?? false) {
+        if ((isset($type['main']) && $type['main'] !== null) ? $type['main'] :  false) {
             //  $_SERVER['REQUEST_URI'] = "/" . ltrim($this->request->requestUri,"/");
             chdir(dirname($type['main']));
             

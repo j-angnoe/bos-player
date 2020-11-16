@@ -24,7 +24,7 @@ class Environment {
         }
 
         // Pre-load inline definitions
-        foreach (($this->modules??[]) as $module) {
+        foreach (((isset($this->modules) && $this->modules !== null) ? $this->modules : []) as $module) {
             if (isset($module['definition'])) {
                 $module['definition']['__path'] = realpath(dirname($fileName));
                 $definition = json_decode(json_encode($module['definition']));
@@ -64,11 +64,11 @@ class Environment {
         }
 
         $environment = new static([
-            'name' => $environmentDefinition['name'] ?? 'Unnamed environment',
-            'storages' => $environmentDefinition['storages'] ?? [],
-            'modules' => $environmentDefinition['modules'] ?? [],
-            'partitions' => $environmentDefinition['partitions'] ?? [],
-            'envs' => $environmentDefinition['envs'] ?? [],
+            'name' => (isset($environmentDefinition['name']) && $environmentDefinition['name'] !== null) ? $environmentDefinition['name'] :  'Unnamed environment',
+            'storages' => (isset($environmentDefinition['storages']) && $environmentDefinition['storages'] !== null) ? $environmentDefinition['storages'] :  [],
+            'modules' => (isset($environmentDefinition['modules']) && $environmentDefinition['modules'] !== null) ? $environmentDefinition['modules'] :  [],
+            'partitions' => (isset($environmentDefinition['partitions']) && $environmentDefinition['partitions'] !== null) ? $environmentDefinition['partitions'] :  [],
+            'envs' => (isset($environmentDefinition['envs']) && $environmentDefinition['envs'] !== null) ? $environmentDefinition['envs'] :  [],
             'source' => $fileName
         ]);
 
@@ -121,7 +121,7 @@ class Environment {
                 return $value;
             },
             'provides' => function($value, $module) {
-                $this->providers[$value] = $this->providers[$value] ?? [];
+                $this->providers[$value] = (isset($this->providers[$value]) && $this->providers[$value] !== null) ? $this->providers[$value] :  [];
                 $this->providers[$value][] = $module['id'];
 
                 return $value;
@@ -141,17 +141,17 @@ class Environment {
             $definition = Module::readDefinition($module['id'], false);
 
             // Everything inside the `data` key will be collected.
-            foreach (($definition->data ?? []) as $key=>$value) {
+            foreach (((isset($definition->data) && $definition->data !== null) ? $definition->data :  []) as $key=>$value) {
                 if (!is_array($value)) {
                     $value = [$value];
                 }
-                $collectedModuleData[$key] = array_merge($collectedModuleData[$key] ?? [], $value);        
+                $collectedModuleData[$key] = array_merge((isset($collectedModuleData[$key]) && $collectedModuleData[$key] !== null) ? $collectedModuleData[$key] :  [], $value);        
             }
 
             // Special collects: access-map
             if ($module['id'] === 'access-map') {
-                $this->accessMap = $module['accessMap'] ?? [];
-                $this->accessLevelDefinitions = $module['levelDefinitions'] ?? [];
+                $this->accessMap = (isset($module['accessMap']) && $module['accessMap'] !== null) ? $module['accessMap'] :  [];
+                $this->accessLevelDefinitions = (isset($module['levelDefinitions']) && $module['levelDefinitions'] !== null) ? $module['levelDefinitions'] :  [];
             }
 
             // Special collects: certain attributes.
@@ -204,18 +204,18 @@ class Environment {
         // Ensure catalogue dir is an absolute path, 
         // because we'll fix PhpModuleExecutor will chdir to everywhere.
         $_ENV['CATALOGUE_DIR'] = realpath($_ENV['CATALOGUE_DIR']);
-        if ($_ENV['ENVIRONMENT_FILE'] ?? false) {
+        if ((isset($_ENV['ENVIRONMENT_FILE']) && $_ENV['ENVIRONMENT_FILE'] !== null) ? $_ENV['ENVIRONMENT_FILE'] :  false) {
             $_ENV['ENVIRONMENT_FILE'] = realpath($_ENV['ENVIRONMENT_FILE']);
         }
-        if ($_ENV["ENVIRONMENTS_DIR"] ?? false) {
+        if ((isset($_ENV["ENVIRONMENTS_DIR"]) && $_ENV["ENVIRONMENTS_DIR"] !== null) ? $_ENV["ENVIRONMENTS_DIR"] :  false) {
             $_ENV['ENVIRONMENTS_DIR'] = realpath($_ENV['ENVIRONMENTS_DIR']);
         }
 
-        $env['DB_HOST']     = $_ENV['DB_HOST'] ?? $this->storages['database']['host'] ?? null;
-        $env['DB_PORT']     = $_ENV['DB_PORT'] ?? $this->storages['database']['port'] ?? null;
-        $env['DB_DATABASE'] = $_ENV['DB_DATABASE'] ?? $this->storages['database']['database'] ?? null;
-        $env['DB_USERNAME'] = $_ENV['DB_USERNAME'] ?? $this->storages['database']['username'] ?? null;
-        $env['DB_PASSWORD'] = $_ENV['DB_PASSWORD'] ?? $this->storages['database']['password'] ?? null;    
+        $env['DB_HOST']     = (isset($_ENV['DB_HOST']) && $_ENV['DB_HOST'] !== null) ? $_ENV['DB_HOST'] :  (isset($this->storages['database']['host']) && $this->storages['database']['host'] !== null) ? $this->storages['database']['host'] :  null;
+        $env['DB_PORT']     = (isset($_ENV['DB_PORT']) && $_ENV['DB_PORT'] !== null) ? $_ENV['DB_PORT'] :  (isset($this->storages['database']['port']) && $this->storages['database']['port'] !== null) ? $this->storages['database']['port'] :  null;
+        $env['DB_DATABASE'] = (isset($_ENV['DB_DATABASE']) && $_ENV['DB_DATABASE'] !== null) ? $_ENV['DB_DATABASE'] :  (isset($this->storages['database']['database']) && $this->storages['database']['database'] !== null) ? $this->storages['database']['database'] :  null;
+        $env['DB_USERNAME'] = (isset($_ENV['DB_USERNAME']) && $_ENV['DB_USERNAME'] !== null) ? $_ENV['DB_USERNAME'] :  (isset($this->storages['database']['username']) && $this->storages['database']['username'] !== null) ? $this->storages['database']['username'] :  null;
+        $env['DB_PASSWORD'] = (isset($_ENV['DB_PASSWORD']) && $_ENV['DB_PASSWORD'] !== null) ? $_ENV['DB_PASSWORD'] :  (isset($this->storages['database']['password']) && $this->storages['database']['password'] !== null) ? $this->storages['database']['password'] :  null;    
 
         if (isset($_ENV['USERDATA_ROOT_DIR'])) {
             $env["HOME"] = $this->getHomeDir();
