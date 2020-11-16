@@ -35,7 +35,7 @@ class Base {
         $parseTime = round(1000 * (microtime(true) - BOS_PLAYER_REQUEST_START), 2) . 'ms';
         $peakMemory = round(memory_get_peak_usage() / 1024**2,2).'MB';
 
-        $pageTitle = $module->definition['name'] ?? 'Unnamed';
+        $pageTitle = (isset($module->definition['name']) && $module->definition['name'] !== null) ? $module->definition['name'] :  'Unnamed';
 
         return <<<TEMPLATE
     <!DOCTYPE html>
@@ -137,7 +137,7 @@ TEMPLATE;
         $partitionSelector = $this->renderPartitionSelector();
         $user = \BOS\Player\User::getUser();
         if ($user) {
-            $currentUser = '<div style="float:right;">' . ($user['name'] ?? $user['username'] ?? $user['email'] ?? 'logged in.') . '</div>';
+            $currentUser = '<div style="float:right;">' . ((isset($user['name']) && $user['name'] !== null) ? $user['name'] :  (isset($user['username']) && $user['username'] !== null) ? $user['username'] :  (isset($user['email']) && $user['email'] !== null) ? $user['email'] :  'logged in.') . '</div>';
         } else {
             $currentUser = '';
         }

@@ -23,7 +23,7 @@ class EnvironmentPartition {
         // @fixme - using all environment modules is just to get 
         // started. This should use the partition/module mapping in the future.
 
-        if ($data['modules'] ?? false) {
+        if ((isset($data['modules']) && $data['modules'] !== null) ? $data['modules'] :  false) {
             $moduleMap = [];
             foreach ($environment->modules as $mod){
                 if (!isset($moduleMap[$mod['id']])) {
@@ -51,7 +51,7 @@ class EnvironmentPartition {
     function setGlobals() {
         $envs = [];
         $envs['BOS_PARTITION_URL'] = $this->url();
-        $envs['BOS_PARTITION_ID'] = $this->data['id'] ?? null;
+        $envs['BOS_PARTITION_ID'] = (isset($this->data['id']) && $this->data['id'] !== null) ? $this->data['id'] :  null;
 
         $this->environment->setGlobals($envs);
     }

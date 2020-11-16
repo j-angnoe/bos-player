@@ -72,6 +72,33 @@ class DB {
     static function table($table) {
         return new DBTableOperation($table, self::getPdoConnection());
     }
+
+
+    // execute a query, fetch all results.
+    static function fetchAll($query, $values = []) {
+        $pdo = self::getPdoConnection();
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($values);        
+
+        $rows = [];
+        while($row = $stmt->fetch()) {
+            $rows[] = $row;
+        }
+        $stmt->closeCursor();
+        return $rows;
+    }
+
+
+    // execute a query, fetch all results.
+    static function fetchOne($query, $values = []) {
+        $pdo = self::getPdoConnection();
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($values);        
+
+        $row = $stmt->fetch();
+        $stmt->closeCursor();
+        return $row;
+    }
 }
 
 class DBTableOperation {

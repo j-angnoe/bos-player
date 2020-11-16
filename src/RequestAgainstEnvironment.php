@@ -69,7 +69,7 @@ class RequestAgainstEnvironment {
 
         $_SERVER['BOS_BASE_URL'] = $_ENV['BOS_BASE_URL'] = $baseUrl;
         $_SERVER['BOS_MODULE_URL'] = $_ENV['BOS_MODULE_URL'] = $baseUrl;
-        $_SERVER['SERVER_URL'] = $_ENV['SERVER_URL'] = ($_SERVER["HTTP_X_FORWARDED_PROTO"] ?? $_SERVER['REQUEST_SCHEME'] ?? 'http'). '://'.$_SERVER['HTTP_HOST'];
+        $_SERVER['SERVER_URL'] = $_ENV['SERVER_URL'] = ((isset($_SERVER["HTTP_X_FORWARDED_PROTO"]) && $_SERVER["HTTP_X_FORWARDED_PROTO"] !== null) ? $_SERVER["HTTP_X_FORWARDED_PROTO"] :  (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] !== null) ? $_SERVER['REQUEST_SCHEME'] :  'http'). '://'.$_SERVER['HTTP_HOST'];
         $_SERVER['BOS_BASE_URL_FULL'] = $_ENV['BOS_BASE_URL_FULL'] = "{$_ENV['SERVER_URL']}{$_ENV['BOS_BASE_URL']}"; 
         // $this->setGlobals();
 
@@ -135,7 +135,7 @@ class RequestAgainstEnvironment {
     }
 
     function isHttps() {
-        return ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https' ||
+        return ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== null) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] :  '') === 'https' ||
                 isset($_SERVER['HTTPS'])
         ;
     }
@@ -152,11 +152,11 @@ class RequestAgainstEnvironment {
     }
 
     function getMenuItemsForUser() {
-        $menuItems = $this->environment->collectedModuleData['menu'] ?? [];
+        $menuItems = (isset($this->environment->collectedModuleData['menu']) && $this->environment->collectedModuleData['menu'] !== null) ? $this->environment->collectedModuleData['menu'] :  [];
 
         // First: Filter menu items for user:
         $menuItems = array_values(array_filter($menuItems, function ($menuItem) {
-            if ($menuItem->access ?? false) {
+            if ((isset($menuItem->access) && $menuItem->access !== null) ? $menuItem->access :  false) {
                 return $this->userHasLevel($menuItem->access);
             } else {
                 return $this->mayAccessModule($menuItem->module);
@@ -165,16 +165,16 @@ class RequestAgainstEnvironment {
 
         // Now sort them based on weight.
         usort($menuItems, function($a, $b) {
-            return ($a->weight ?? 0) - ($b->weight ?? 0);
+            return ((isset($a->weight) && $a->weight !== null) ? $a->weight :  0) - ((isset($b->weight) && $b->weight !== null) ? $b->weight :  0);
         });
 
         return array_map(function($menuItem) {
-            $part = $this->partition ?? $this->environment;
+            $part = (isset($this->partition) && $this->partition !== null) ? $this->partition :  $this->environment;
 
-            if ($menuItem->absoluteUrl ?? false) {
+            if ((isset($menuItem->absoluteUrl) && $menuItem->absoluteUrl !== null) ? $menuItem->absoluteUrl :  false) {
                 $menuItem->url = $menuItem->absoluteUrl;
             } else {
-                $menuItem->url = $part->url($menuItem->module ."/" . ($menuItem->url ?? ''));
+                $menuItem->url = $part->url($menuItem->module ."/" . ((isset($menuItem->url) && $menuItem->url !== null) ? $menuItem->url :  ''));
             }
             return $menuItem;
         }, $menuItems);

@@ -38,11 +38,11 @@ trait AuthorizesRequest {
 
 
 
-        if ($this->environment->accessMap[$moduleId] ?? false) {
+        if ((isset($this->environment->accessMap[$moduleId]) && $this->environment->accessMap[$moduleId] !== null) ? $this->environment->accessMap[$moduleId] :  false) {
             $requiredAccessLevel = $this->environment->accessMap[$moduleId];
         } else {
             $definition = $getDefinition();
-            $requiredAccessLevel = strtolower($definition['access'] ?? 'user');
+            $requiredAccessLevel = strtolower((isset($definition['access']) && $definition['access'] !== null) ? $definition['access'] :  'user');
         }
 
         BosLog::log('authorize: %s requires user level %s', [$moduleId, $requiredAccessLevel]);
@@ -57,8 +57,8 @@ trait AuthorizesRequest {
 
     function userHasLevel($level, $throw = false) {
 
-        if ($this->environment->accessLevelDefinitions ?? false) {
-            $level = $this->environment->accessLevelDefinitions[$level] ?? $level;
+        if ((isset($this->environment->accessLevelDefinitions) && $this->environment->accessLevelDefinitions !== null) ? $this->environment->accessLevelDefinitions :  false) {
+            $level = (isset($this->environment->accessLevelDefinitions[$level]) && $this->environment->accessLevelDefinitions[$level] !== null) ? $this->environment->accessLevelDefinitions[$level] :  $level;
             // echo "Level became $level\n";
         }
 

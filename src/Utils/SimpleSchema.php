@@ -25,13 +25,21 @@ class SimpleSchema {
         $blocks = [];
 
         while(false !== (list(,$line) = @each($definition))) { 
+            // skip comment lines
+            if (substr(ltrim($line), 0, 1) === '#') {
+                continue;
+            }
             if (substr($line, -1) === ':') {
                 $block_name = substr($line, 0, -1);
 
                 $blocks[$block_name] = [];
 
                 while(false !== (list(,$line) = each($definition))) { 
-
+                    // skip comment lines
+                    if (substr(ltrim($line), 0, 1) === '#') {
+                        continue;
+                    }
+                    
                     if (substr($line, -1) === ':') {
                         prev($definition);
                         continue 2;
@@ -121,7 +129,7 @@ class SimpleSchema {
                 $field = $match['field1'] ? $match['field1'] : $match['field2'];
 
                 try { 
-                    $type = $this->grabAll("DESCRIBE $table $field")[0]['Type'] . " " . ltrim($match['extra'] ?? '');
+                    $type = $this->grabAll("DESCRIBE $table $field")[0]['Type'] . " " . ltrim((isset($match['extra']) && $match['extra'] !== null) ? $match['extra'] :  '');
 
                     $processed[$key] = [$type, function () use ($key, $table, $field, $match) {
                         return [
@@ -144,7 +152,7 @@ class SimpleSchema {
                 continue;
             } 
 
-            $value = $translateFields[$value] ?? $value;
+            $value = (isset($translateFields[$value]) && $translateFields[$value] !== null) ? $translateFields[$value] :  $value;
 
             $processed[$key] = $value;
         }
@@ -176,7 +184,12 @@ class SimpleSchema {
 
         $fields = $this->processFields($this->fields);
 
-        $lastField = 'id';
+
+        if ($columnExists('id')) { 
+            $lastField = 'id';
+        } else {
+            $lastField = false;
+        }
 
         foreach ($fields as $fieldName => $fd) {
             $cb = false;
@@ -188,12 +201,17 @@ class SimpleSchema {
             }
             
             $modified = false;
+
+            if ($lastField) { 
+                $afterClause = "AFTER `$lastField`";
+            }
+
             if (!$columnExists($fieldName)) {
                 $modified = true;
-                $modifications[] = "$prefix ADD COLUMN `$fieldName` $fieldDefinition AFTER `$lastField`";
+                $modifications[] = "$prefix ADD COLUMN `$fieldName` $fieldDefinition $afterClause";
             } elseif (!$columnExists($fieldName, $fieldDefinition)) {
                 $modified = true;
-                $modifications[] = "$prefix MODIFY COLUMN `$fieldName` $fieldDefinition AFTER `$lastField`";
+                $modifications[] = "$prefix MODIFY COLUMN `$fieldName` $fieldDefinition $afterClause";
             }
 
             if ($modified && $cb) {

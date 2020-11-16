@@ -12,7 +12,7 @@ class LogDisplayer {
             return;
         }
         $htmlOutput = false;
-        if (($_SERVER['HTTP_ACCEPT'] ?? false) && preg_match("~(text/html|\*.\*)~", $_SERVER['HTTP_ACCEPT'])) {
+        if (((isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] !== null) ? $_SERVER['HTTP_ACCEPT'] :  false) && preg_match("~(text/html|\*.\*)~", $_SERVER['HTTP_ACCEPT'])) {
             $htmlOutput = true;
         }
         if ($htmlOutput) {
@@ -29,13 +29,13 @@ class LogDisplayer {
                     $log['context'] = null;
                 }
                 $message = substr($message, 0, 250);
-                if ($log['context'] ?? false) {
+                if ((isset($log['context']) && $log['context'] !== null) ? $log['context'] :  false) {
                     $message = json_encode($log['context'], JSON_PRETTY_PRINT);
                 }
 
                 echo '<tr>';
                 echo '<td>' . round(1000*($log['time'] - $firstTimeLogged),2) . '</td>';
-                echo '<td>' . ($log['type'] ?? ''). '</td>';
+                echo '<td>' . ((isset($log['type']) && $log['type'] !== null) ? $log['type'] :  ''). '</td>';
                 echo '<td>' . $message;
                 echo '</td>';
 
