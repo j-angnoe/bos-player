@@ -201,6 +201,8 @@ class SimpleSchema {
             }
             
             $modified = false;
+            $afterClause = '';
+            
 
             if ($lastField) { 
                 $afterClause = "AFTER `$lastField`";
